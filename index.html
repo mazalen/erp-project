@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP-прототип для НЭВЗ | MRP планирование</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 24px;
+            color: #1a2c3e;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0b2b3d, #123e52);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 1.9rem;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 1rem;
+        }
+
+        .badge {
+            background: #ffb347;
+            color: #1e2f3a;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .dashboard {
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            padding: 20px 24px;
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-left: 5px solid #e67e22;
+            padding-left: 16px;
+            color: #1e4663;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin: 16px 0 10px;
+            color: #2c5a7a;
+        }
+
+        .spec-table, .stock-table, .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .spec-table th, .stock-table th, .result-table th {
+            background: #eef2f7;
+            text-align: left;
+            padding: 10px 8px;
+            font-weight: 600;
+        }
+
+        .spec-table td, .stock-table td, .result-table td {
+            padding: 8px 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stock-input {
+            width: 85px;
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        button {
+            background: #2c7da0;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-right: 12px;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background: #1f5e7e;
+            transform: scale(1.01);
+        }
+
+        .btn-reset {
+            background: #5f6c7a;
+        }
+
+        .deficit-block {
+            background: #fff6e8;
+            border-left: 6px solid #e67e22;
+            padding: 16px 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .deficit-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+
+        .deficit-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #ffddb0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .success-msg {
+            color: #2b7a3e;
+            background: #e6f4ea;
+            padding: 12px;
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 12px 18px;
+            flex: 1;
+            text-align: center;
+            border: 1px solid #dee4ec;
+        }
+
+        .metric-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #e67e22;
+        }
+
+        .payback {
+            background: #e8f0fe;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .payback-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e4663;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            background: #e9f0f5;
+            border-radius: 20px;
+            padding: 16px 24px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🧠 ERP-прототип · ОАО «НЭВЗ»</h1>
+        <p>MRP (Material Requirements Planning) — автоматическое планирование потребности в материалах для производства электровозов</p>
+        <div class="badge">🔧 Молодежный трек 16–19 | Технологии будущего для промышленности</div>
+    </div>
+
+    <div class="dashboard">
+        <div class="card">
+            <h2>📦 1. Спецификация (BOM)</h2>
+            <p style="font-size:0.85rem; margin-top:-8px;">на 1 электровоз Э5К</p>
+            <table class="spec-table" id="bom-table">
+                <thead><tr><th>Комплектующая</th><th>Кол-во на 1 шт</th></tr></thead>
+                <tbody id="bom-body"></tbody>
+            </table>
+
+            <h2>📌 2. Текущие запасы (можно редактировать)</h2>
+            <table class="stock-table" id="stock-table">
+                <thead><tr><th>Деталь</th><th>Остаток (шт)</th></tr></thead>
+                <tbody id="stock-body"></tbody>
+            </table>
+            <button id="reset-stock">⟳ Сбросить запасы</button>
+        </div>
+
+        <div class="card">
+            <h2>⚙️ 3. Планирование заказа</h2>
+            <label style="font-weight:600;">Количество электровозов:</label>
+            <input type="number" id="order-qty" value="2" min="1" max="10" style="width:100px; padding:8px; margin:8px 12px 0 0; border-radius:16px; border:1px solid #ccc;">
+            <button id="run-mrp">📊 Запустить MRP</button>
+
+            <div id="result-area">
+                <h3>📋 Результат планирования</h3>
+                <div id="mrp-report" style="background:#f9fbfd; border-radius: 20px; padding: 8px 0;"></div>
+                <div id="deficit-panel"></div>
+                <div class="metrics" id="metrics-panel"></div>
+                <div class="payback" id="payback-panel">
+                    <strong>💰 Окупаемость инвестиций (CAPEX 12 млн руб.):</strong><br>
+                    <span id="payback-value" class="payback-value">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-note">
+        ⚡ Прототип демонстрирует логику MRP: расчёт валовой потребности → учёт остатков → выявление дефицита.<br>
+        ERP автоматически формирует рекомендации по закупкам. Реалистичный срок окупаемости — <strong>8–10 месяцев</strong>.
+    </div>
+</div>
+
+<script>
+    // СПЕЦИФИКАЦИЯ (BOM)
+    const BOM = {
+        "колесная пара": 4,
+        "тяговый двигатель": 4,
+        "микропроцессорная система управления": 1,
+        "кабель силовой (м)": 100,
+        "болт М20 (комплект)": 200,
+        "трансформатор": 1,
+        "пневматический тормоз": 1
+    };
+
+    // НАЧАЛЬНЫЕ ЗАПАСЫ
+    const DEFAULT_STOCK = {
+        "колесная пара": 12,
+        "тяговый двигатель": 7,
+        "микропроцессорная система управления": 2,
+        "кабель силовой (м)": 250,
+        "болт М20 (комплект)": 600,
+        "трансформатор": 1,
+        "пневматический тормоз": 2
+    };
+
+    let currentStock = { ...DEFAULT_STOCK };
+
+    function renderSpecAndStock() {
+        const bomBody = document.getElementById('bom-body');
+        bomBody.innerHTML = '';
+        for (const [part, qty] of Object.entries(BOM)) {
+            const row = bomBody.insertRow();
+            row.insertCell(0).innerText = part;
+            row.insertCell(1).innerText = qty;
+        }
+
+        const stockBody = document.getElementById('stock-body');
+        stockBody.innerHTML = '';
+        for (const [part, qty] of Object.entries(currentStock)) {
+            const row = stockBody.insertRow();
+            row.insertCell(0).innerText = part;
+            const inputCell = row.insertCell(1);
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = qty;
+            input.min = 0;
+            input.step = 1;
+            input.className = 'stock-input';
+            input.addEventListener('change', (e) => {
+                let newVal = parseInt(e.target.value, 10);
+                if (isNaN(newVal)) newVal = 0;
+                currentStock[part] = newVal;
+            });
+            inputCell.appendChild(input);
+        }
+    }
+
+    function resetStock() {
+        currentStock = { ...DEFAULT_STOCK };
+        renderSpecAndStock();
+        document.getElementById('mrp-report').innerHTML = '<div style="padding: 12px; color:#2c5a7a;">🔄 Запасы сброшены. Нажмите "Запустить MRP" для нового расчёта.</div>';
+        document.getElementById('deficit-panel').innerHTML = '';
+        document.getElementById('metrics-panel').innerHTML = '';
+        document.getElementById('payback-value').innerText = '—';
+    }
+
+    // РАСЧЁТ РЕАЛИСТИЧНОЙ ОКУПАЕМОСТИ (8-10 месяцев)
+    function calculatePayback(deficitAmount) {
+        // Консервативные экономические допущения (реалистичные для НЭВЗ):
+        // - CAPEX = 12 млн руб.
+        // - Годовая экономия при ОТСУТСТВИИ дефицита и оптимизации: ~15-18 млн руб.
+        // - Каждый случай дефицита снижает экономию
+        // Формула: базовая годовая экономия снижается пропорционально дефициту
+        
+        const CAPEX = 12; // млн руб.
+        
+        // Базовая годовая экономия при идеальной работе ERP (консервативная оценка)
+        // В реальности ERP даёт экономию за счёт: снижения запасов (-15%), сокращения простоев,
+        // уменьшения брака, оптимизации закупок. Но эффект накапливается постепенно.
+        const BASE_YEARLY_SAVING = 16; // млн руб. в год (реалистично для предприятия масштаба НЭВЗ)
+        
+        // Штраф за дефицит: каждый случай дефицита (в условных единицах) снижает экономию
+        // Преобразуем сумму дефицита (количество недостающих деталей) в коэффициент потерь
+        // Максимальный дефицит (полная остановка) снижает экономию на 50%
+        const maxDeficitPenalty = 500; // условный порог максимального штрафа
+        let penaltyFactor = Math.min(deficitAmount / maxDeficitPenalty, 0.5);
+        
+        // Фактическая годовая экономия с учётом текущего дефицита
+        let actualYearlySaving = BASE_YEARLY_SAVING * (1 - penaltyFactor);
+        if (actualYearlySaving < 0.5) actualYearlySaving = 0.5;
+        
+        // Срок окупаемости в годах и месяцах
+        let paybackYears = CAPEX / actualYearlySaving;
+        let paybackMonths = Math.round(paybackYears * 12);
+        
+        // Ограничиваем разумными пределами
+        if (paybackMonths < 6) paybackMonths = 6;
+        if (paybackMonths > 24) paybackMonths = 24;
+        
+        return {
+            months: paybackMonths,
+            saving: actualYearlySaving,
+            baseSaving: BASE_YEARLY_SAVING
+        };
+    }
+
+    function runMRP() {
+        let orderQty = parseInt(document.getElementById('order-qty').value, 10);
+        if (isNaN(orderQty) || orderQty < 1) orderQty = 1;
+
+        // Валовая потребность
+        const grossReq = {};
+        for (const [part, perUnit] of Object.entries(BOM)) {
+            grossReq[part] = perUnit * orderQty;
+        }
+
+        let simulatedStock = { ...currentStock };
+        const shortageResult = {};
+        const details = [];
+
+        for (const [part, need] of Object.entries(grossReq)) {
+            const available = simulatedStock[part] || 0;
+            let deficit = 0;
+            let remaining = 0;
+            if (available >= need) {
+                remaining = available - need;
+                deficit = 0;
+            } else {
+                deficit = need - available;
+                remaining = 0;
+            }
+            if (deficit > 0) shortageResult[part] = deficit;
+            else shortageResult[part] = 0;
+            simulatedStock[part] = remaining;
+            details.push({ part, need, available, deficit, remaining });
+        }
+
+        // Обновляем склад
+        for (const [part, newQty] of Object.entries(simulatedStock)) {
+            currentStock[part] = newQty;
+        }
+        renderSpecAndStock();
+
+        // Таблица результатов
+        let tableHtml = `<table class="result-table" style="width:100%; margin-top:12px;">
+                            <thead><tr>
+                                <th>Деталь</th><th>Нужно (шт)</th><th>Было (шт)</th><th>Не хватает</th><th>Остаток после</th>
+                            </tr></thead><tbody>`;
+        for (const d of details) {
+            const deficitSymbol = d.deficit > 0 ? `⚠️ ${d.deficit}` : '✓ 0';
+            tableHtml += `<tr style="${d.deficit > 0 ? 'background:#fff0e0;' : ''}">
+                             <td>${d.part}</td><td>${d.need}</td><td>${d.available}</td>
+                             <td><b>${deficitSymbol}</b></td><td>${d.remaining}</td>
+                          </tr>`;
+        }
+        tableHtml += `</tbody></table>`;
+        document.getElementById('mrp-report').innerHTML = tableHtml;
+
+        // Панель дефицита
+        const deficitEntries = Object.entries(shortageResult).filter(([_, val]) => val > 0);
+        const totalDeficitQty = deficitEntries.reduce((sum, [,val]) => sum + val, 0);
+        
+        let deficitHtml = '';
+        if (deficitEntries.length === 0) {
+            deficitHtml = `<div class="success-msg">✅ Дефицит отсутствует! Все заказы могут быть выполнены в срок.</div>`;
+        } else {
+            deficitHtml = `<div class="deficit-block">
+                            <strong>⚠️ РЕКОМЕНДАЦИИ ERP (автоматические заказы на закупку):</strong>
+                            <ul class="deficit-list">`;
+            for (const [part, deficitVal] of deficitEntries) {
+                deficitHtml += `<li>📦 Срочно заказать <b>${part}</b> — ${deficitVal} шт.</li>`;
+            }
+            deficitHtml += `</ul></div>`;
+        }
+        document.getElementById('deficit-panel').innerHTML = deficitHtml;
+
+        // РАСЧЁТ ОКУПАЕМОСТИ (реалистичный)
+        const paybackData = calculatePayback(totalDeficitQty);
+        
+        // Метрики
+        let statusText = (deficitEntries.length === 0) ? '✅ Заказ выполним' : '⚠️ Требуется дозакупка';
+        let statusColor = (deficitEntries.length === 0) ? '#2b7a3e' : '#e67e22';
+        
+        const metricHtml = `
+            <div class="metric-card"><div class="metric-value">${orderQty} шт</div><div>Заказ электровозов</div></div>
+            <div class="metric-card"><div class="metric-value">${totalDeficitQty}</div><div>Дефицит (шт)</div></div>
+            <div class="metric-card"><div class="metric-value" style="color:${statusColor};">${statusText}</div><div>Статус сборки</div></div>
+        `;
+        document.getElementById('metrics-panel').innerHTML = metricHtml;
+        
+        // Панель окупаемости
+        let paybackText = '';
+        if (deficitEntries.length === 0) {
+            paybackText = `📊 При текущей эффективности ERP окупаемость составит <strong style="font-size:1.6rem;">${paybackData.months} месяцев</strong><br>
+                           <span style="font-size:0.8rem;">(CAPEX: 12 млн руб. | Годовая экономия: ~${paybackData.saving.toFixed(1)} млн руб.)</span>`;
+        } else {
+            paybackText = `⚠️ Из-за выявленного дефицита эффективность ERP снижена.<br>
+                           Ожидаемая окупаемость: <strong style="font-size:1.6rem;">${paybackData.months} месяцев</strong><br>
+                           <span style="font-size:0.8rem;">(Для ускорения окупаемости необходимо устранить дефицит через автоматические закупки)</span>`;
+        }
+        document.getElementById('payback-value').innerHTML = paybackText;
+    }
+
+    document.getElementById('run-mrp').addEventListener('click', () => { runMRP(); });
+    document.getElementById('reset-stock').addEventListener('click', () => { resetStock(); });
+
+    renderSpecAndStock();
+    setTimeout(() => { runMRP(); }, 100);
+</script>
+</body>
+</html>
